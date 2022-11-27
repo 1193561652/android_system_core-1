@@ -78,6 +78,8 @@
 #include "snapuserd_transition.h"
 #include "util.h"
 
+#define BAT
+
 using namespace std::string_literals;
 
 using android::base::ParseInt;
@@ -92,7 +94,7 @@ namespace init {
 namespace {
 
 enum EnforcingStatus { SELINUX_PERMISSIVE, SELINUX_ENFORCING };
-
+#ifndef BAT
 EnforcingStatus StatusFromProperty() {
     EnforcingStatus status = SELINUX_ENFORCING;
 
@@ -112,12 +114,17 @@ EnforcingStatus StatusFromProperty() {
 
     return status;
 }
+#endif
 
 bool IsEnforcing() {
+#ifdef BAT
+    return false;
+#else
     if (ALLOW_PERMISSIVE_SELINUX) {
         return StatusFromProperty() == SELINUX_ENFORCING;
     }
     return true;
+#endif
 }
 
 // Forks, executes the provided program in the child, and waits for the completion in the parent.
